@@ -1,8 +1,10 @@
 use bevy::prelude::*;
+use bevy::render::texture::{SamplerDescriptor, FilterMode};
 
 const SHIP_ROTATION: f32 = std::f32::consts::PI;
 const SHIP_ACCELERATION: f32 = 25.0;
-const SPRITE_SIZE: f32 = 32.0;
+const SPRITE_HEIGHT: f32 = 34.0;
+const SPRITE_WIDTH: f32 = 16.0;
 const SPRITE_DELAY: f32 = 0.2;
 
 struct Materials {
@@ -55,6 +57,11 @@ struct ShipAnimations {
     accelerating: Handle<TextureAtlas>,
 }
 
+enum ShipState {
+    Coasting,
+    Accelerating,
+}
+
 struct Ship;
 
 fn setup(
@@ -71,10 +78,10 @@ fn setup(
     };
 
     // create texture atlases
-    let needle = load_atlas("needle.png", SPRITE_SIZE, SPRITE_SIZE, 1);
-    let needle_accelerating = load_atlas("needle_accelerating.png", SPRITE_SIZE, SPRITE_SIZE, 4);
-    let wedge = load_atlas("wedge.png", SPRITE_SIZE, SPRITE_SIZE, 1);
-    let wedge_accelerating = load_atlas("wedge_accelerating.png", SPRITE_SIZE, SPRITE_SIZE, 4);
+    let needle = load_atlas("needle_blur.png", SPRITE_WIDTH, SPRITE_HEIGHT, 1);
+    let needle_accelerating = load_atlas("needle_acc_blur.png", SPRITE_WIDTH, SPRITE_HEIGHT, 4);
+    let wedge = load_atlas("wedge_blur.png", SPRITE_WIDTH, SPRITE_HEIGHT, 1);
+    let wedge_accelerating = load_atlas("wedge_acc_blur.png", SPRITE_WIDTH, SPRITE_HEIGHT, 4);
     commands.insert_resource(ShipSprites {
         needle,
         needle_accelerating,
@@ -111,6 +118,7 @@ fn add_ships(mut commands: Commands, ships: Res<ShipSprites>) {
             coasting: ships.needle.clone(),
             accelerating: ships.needle_accelerating.clone(),
         })
+        .insert(ShipState::Coasting)
         .insert_bundle(SpriteSheetBundle {
             texture_atlas: ships.needle.clone(),
             ..Default::default()
